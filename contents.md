@@ -1,25 +1,3 @@
-# Menu for next week
-
-22/05/2024 ~ Menu for next week ~ How can i up date the compilers stack machine declaration
-
-#### Nguyên liệu
-
-##### _Thịt ba chỉ, thịt heo xay, thịt heo cắt sẵn, thịt bò, mực, cá lóc_
-
-<br>
-
-**Thứ 2:** Thịt heo cắt sẵn rim, canh mực thơm.
-
-**Thứ 3:** Canh rạm mòng tơi, cá kho.
-
-**Thứ 4:** Cá lóc nấu măng chua, chả trứng chiên
-
-**Thứ 5:** Thịt heo cải thìa, Canh tôm rau khoai
-
-**Thứ 6:** Canh mướp đắng thịt bò, thịt xay nấu canh rau củ hầm.
-
-<div class="color-blue italic">Mua thêm: thơm, mòng tơi, cá, măng chua, trứng, cải thìa, tôm, rau khoai, mướp đắng, rau củ</div>
-
 # Mongodump and mongorestore with Docker
 
 25/05/2024 ~ Mongodump and mongorestore with Docker ~ Mongodump and mongorestore with Docker, Docker Compose ~ https://s3.buyngon.com/buyngon/web/R6VCTP4YDLAA6RGE3XF1.jpeg?AWSAccessKeyId=xEwgF5o8CqajX2gVVPJo&Expires=2583770325&Signature=VbiObJ6Uw5dGqH6d1ZCjx8eG%2Fpg%3D
@@ -114,3 +92,288 @@ mongorestore -d blogs /dump_backup (if without secure username/password)
 ### Finally
 
 If the database just deploy production. You only ssh to the host and do the same. I hope you find the information here useful
+
+# Apply SOLID principles in NestJs
+
+20/07/2024 ~ SOLID in NestJs ~ SOLID in NestJs ~ https://s3.buyngon.com/buyngon/web/VD9T6UMN2DVTCUP7RQWE.jpeg?AWSAccessKeyId=xEwgF5o8CqajX2gVVPJo&Expires=2605856004&Signature=23FJA1SKPzXMrsLnGSfjuzqIE84%3D
+
+<br>
+
+[![SOLID in NestJs](https://s3.buyngon.com/buyngon/web/VD9T6UMN2DVTCUP7RQWE.jpeg?AWSAccessKeyId=xEwgF5o8CqajX2gVVPJo&Expires=2605856004&Signature=23FJA1SKPzXMrsLnGSfjuzqIE84%3D)](https://s3.buyngon.com/buyngon/web/R6VCTP4YDLAA6RGE3XF1.jpeg?AWSAccessKeyId=xEwgF5o8CqajX2gVVPJo&Expires=2583770325&Signature=VbiObJ6Uw5dGqH6d1ZCjx8eG%2Fpg%3D)
+
+### Introduction
+
+One of the most important principles in software development is the SOLID principles. SOLID is a set of principles that help you write better code. It stands for Single Responsibility Principle, Open/Closed Principle, Liskov Substitution Principle, Interface Segregation Principle, and Dependency Inversion Principle.
+
+Now, i will show you how to apply SOLID principles in NestJs.
+
+<br>
+
+### A. <span class="color-blue font-size-xl">S</span>ingle Responsibility Principle
+
+The Single Responsibility Principle (SRP) states that a class should have only one responsibility and, consequently, only one responsibility.
+
+```typescript
+import { Injectable } from "@nestjs/common";
+
+// ❌❌❌ this is BAD code
+@Injectable()
+export class UserService {
+  create() {}
+
+  update() {}
+
+  sendMail() {}
+}
+```
+
+```typescript
+// ✅✅✅ this is GOOD code
+@Injectable()
+export class UserService {
+  create() {}
+
+  update() {}
+}
+
+@Injectable()
+export class MailService {
+  sendMail() {}
+}
+```
+
+```typescript
+// ✅✅✅ this is GOOD code
+@Injectable()
+export class UserController {
+  constructor(
+    private readonly userService: UserService,
+    private readonly mailService: MailService
+  ) {}
+
+  @Post()
+  create(@Body() user: User) {
+    this.userService.create(user);
+    this.mailService.sendMail(user);
+  }
+}
+```
+
+<br>
+
+### B. <span class="color-blue font-size-xl">O</span>pen/Closed Principle
+
+The Open/Closed Principle (OCP) states that a class should be open for extension but closed for modification.
+
+```typescript
+// ❌❌❌ this is BAD code
+@Injectable()
+export class TransactionService {
+  payment(method: string) {
+    if (method === "banking") {
+      // ...
+    } else if (method === "paypal") {
+      // ...
+    } else if (method === "stripe") {
+  }
+}
+```
+
+```typescript
+// ✅✅✅ this is GOOD code
+export abstract class PaymentGateway {
+  abstract payment(method: string): void;
+}
+
+export class BankingPaymentGateway implements PaymentGateway {
+  payment(method: string) {
+    // ... implement banking payment
+  }
+}
+
+export class PaypalPaymentGateway implements PaymentGateway {
+  payment(method: string) {
+    // ... implement paypal payment
+  }
+}
+```
+
+```typescript
+// ✅✅✅ this is GOOD code
+@Injectable()
+export class TransactionService {
+  constructor(private readonly paymentGateway: PaymentGateway) {
+    this.registerPaymentGateway();
+  }
+
+  private paymentGateway: Record<string, PaymentGateway> = {};
+
+  registerPaymentGateway(method: string, gateway: PaymentGateway) {
+    this.paymentGateway["banking"] = new BankingPaymentGateway();
+    this.paymentGateway["paypal"] = new PaypalPaymentGateway();
+  }
+
+  process(method: "banking" | "paypal") {
+    this.paymentGateway[method].payment(method);
+  }
+}
+```
+
+<p class="note">So, if you want to add a new payment method, you can extend the PaymentGateway class and implement the payment method.</p>
+
+<br>
+
+### C. <span class="color-blue font-size-xl">L</span>iskov Substitution Principle
+
+The Liskov Substitution Principle (LSP) states that objects of a superclass should be replaceable with objects of its subclasses without breaking the functionality of your program.
+
+```typescript
+// ❌❌❌ this is BAD code
+class Bird {
+  fly() {}
+}
+
+class Duck extends Bird {
+  fly() {}
+}
+
+class Penguin extends Bird {
+  fly() {
+    throw new Error("Penguins can't fly");
+  }
+}
+```
+
+```typescript
+// ✅✅✅ this is GOOD code
+interface Flyable {
+  fly(): void;
+}
+
+interface Swimable {
+  swim(): void;
+}
+
+class Duck implements Flyable, Swimable {
+  fly() {}
+  swim() {}
+}
+
+class Penguin implements Swimable {
+  swim() {}
+}
+```
+
+<br>
+
+### D. <span class="color-blue font-size-xl">I</span>nterface Segregation Principle
+
+The Interface Segregation Principle (ISP) states that a class should not be forced to implement interfaces that it does not use.
+
+```typescript
+// ❌❌❌ this is BAD code
+interface Notification {
+  message: string;
+  to: string;
+  subject: string;
+  body: string;
+  phone: string;
+  userId: string;
+  title: string;
+}
+
+interface NotificationService {
+  sendSmsNotification(notification: Notification): Promise<void>;
+  sendEmailNotification(notification: Notification): Promise<void>;
+  sendPushNotification(notification: Notification): Promise<void>;
+}
+```
+
+```typescript
+// ✅✅✅ this is GOOD code
+interface SmsNotification {
+  phone: string;
+  message: string;
+}
+
+interface EmailNotification {
+  to: string;
+  body: string;
+  subject: string;
+}
+
+interface PushNotification {
+  userId: string;
+  title: string;
+  message: string;
+}
+
+interface NotificationService {
+  sendSmsNotification(notification: SmsNotification): Promise<void>;
+  sendEmailNotification(notification: EmailNotification): Promise<void>;
+  sendPushNotification(notification: PushNotification): Promise<void>;
+}
+```
+
+<br>
+
+### E. <span class="color-blue font-size-xl">D</span>ependency Inversion Principle
+
+The Dependency Inversion Principle (DIP) states that a class should depend on abstractions rather than concrete implementations.
+
+```typescript
+// ❌❌❌ this is BAD code
+class PostgresDatabase {
+  save(user: string) {
+    // ...
+  }
+}
+
+class UserService {
+  private readonly database: PostgresDatabase;
+
+  constructor(database: PostgresDatabase) {
+    this.database = database;
+  }
+
+  createUser(user: string) {
+    this.database.save(user);
+  }
+}
+```
+
+```typescript
+// ✅✅✅ this is GOOD code
+interface Database {
+  save(user: string): void;
+}
+
+class PostgresDatabase implements Database {
+  save(user: string) {
+    // ...
+  }
+}
+
+class UserService {
+  private readonly database: Database;
+
+  constructor(database: Database) {
+    this.database = database;
+  }
+}
+```
+
+```typescript
+// ✅✅✅ this is GOOD code
+@Module({
+  providers: [{ provide: Database, useClass: PostgresDatabase }],
+})
+export class UserModule {}
+```
+
+<br>
+
+### Finally
+
+Overall, applying SOLID principles in NestJS helps create a codebase that is easier to manage, test, and extend, leading to more reliable and efficient applications.
+
