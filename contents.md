@@ -99,7 +99,7 @@ If the database just deploy production. You only ssh to the host and do the same
 
 <br>
 
-[![SOLID in NestJs](https://s3.buyngon.com/buyngon/web/VD9T6UMN2DVTCUP7RQWE.jpeg?AWSAccessKeyId=xEwgF5o8CqajX2gVVPJo&Expires=2605856004&Signature=23FJA1SKPzXMrsLnGSfjuzqIE84%3D)](https://s3.buyngon.com/buyngon/web/R6VCTP4YDLAA6RGE3XF1.jpeg?AWSAccessKeyId=xEwgF5o8CqajX2gVVPJo&Expires=2583770325&Signature=VbiObJ6Uw5dGqH6d1ZCjx8eG%2Fpg%3D)
+[![SOLID in NestJs](https://s3.buyngon.com/buyngon/web/VD9T6UMN2DVTCUP7RQWE.jpeg?AWSAccessKeyId=xEwgF5o8CqajX2gVVPJo&Expires=2605856004&Signature=23FJA1SKPzXMrsLnGSfjuzqIE84%3D)](https://s3.buyngon.com/buyngon/web/VD9T6UMN2DVTCUP7RQWE.jpeg?AWSAccessKeyId=xEwgF5o8CqajX2gVVPJo&Expires=2605856004&Signature=23FJA1SKPzXMrsLnGSfjuzqIE84%3D)
 
 ### Introduction
 
