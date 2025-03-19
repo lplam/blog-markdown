@@ -377,3 +377,156 @@ export class UserModule {}
 
 Overall, applying SOLID principles in NestJS helps create a codebase that is easier to manage, test, and extend, leading to more reliable and efficient applications.
 
+
+# Generic Repository Pattern in NestJs
+
+01/09/2024 ~ Generic Repository Pattern in NestJs ~ Generic Repository Pattern in NestJs ~ https://s3.buyngon.com/buyngon/web/5USBFVGWS6IC1NCTAP4F.jpeg?AWSAccessKeyId=xEwgF5o8CqajX2gVVPJo&Expires=2606291851&Signature=naOeK6NJ5Wo%2FBcS3eSfld%2FZEwv0%3D
+
+<br>
+
+[![Generic Repository Pattern in NestJs](https://s3.buyngon.com/buyngon/web/5USBFVGWS6IC1NCTAP4F.jpeg?AWSAccessKeyId=xEwgF5o8CqajX2gVVPJo&Expires=2606291851&Signature=naOeK6NJ5Wo%2FBcS3eSfld%2FZEwv0%3D)](https://s3.buyngon.com/buyngon/web/5USBFVGWS6IC1NCTAP4F.jpeg?AWSAccessKeyId=xEwgF5o8CqajX2gVVPJo&Expires=2606291851&Signature=naOeK6NJ5Wo%2FBcS3eSfld%2FZEwv0%3D)
+
+### Introduction
+
+Generic Repository Pattern is a design pattern that provides a generic interface for interacting with a data layer. It is a simple and effective way to create a repository that can be used to interact with any database.
+
+Today, i will show you how to create a generic repository in NestJs.
+
+<br>
+
+### A. Create a repository
+
+```typescript
+@Injectable()
+export class UserRepository {
+  constructor(private readonly userModel: Model<User>) {}
+
+  async findAll(filter: FilterQuery<User>): Promise<User[]> {
+    return this.userModel.find(filter);
+  }
+
+  async findOne(filter: FilterQuery<User>): Promise<User> {
+    return this.userModel.findOne(filter);
+  }
+}
+```
+
+```typescript
+@Injectable()
+export class OrderRepository {
+  constructor(private readonly orderModel: Model<Order>) {}
+
+  async findAll(filter: FilterQuery<Order>): Promise<Order[]> {
+    return this.orderModel.find(filter);
+  }
+
+  async findOne(filter: FilterQuery<Order>): Promise<Order> {
+    return this.orderModel.findOne(filter);
+  }
+}
+```
+
+<p class="note">So, the code is duplicated. If you want to create a repository for a new model, you need to define the same methods again.</p>
+
+<br>
+
+### B. Create a generic repository
+
+```typescript
+@Injectable()
+export abstract class GenericRepository<T> {
+  constructor(private readonly model: Model<T>) {}
+
+  async findAll(filter: FilterQuery<T>): Promise<T[]> {
+    return this.model.find(filter);
+  }
+
+  async findOne(filter: FilterQuery<T>): Promise<T> {
+    return this.model.findOne(filter);
+  }
+
+  /// update, delete, create, etc...
+}
+```
+
+```typescript
+@Injectable()
+export class UserRepository extends GenericRepository<User> {
+  constructor(private readonly userModel: Model<User>) {
+    super(userModel);
+  }
+}
+```
+
+```typescript
+@Injectable()
+export class OrderRepository extends GenericRepository<Order> {
+  constructor(private readonly orderModel: Model<Order>) {
+    super(orderModel);
+  }
+}
+```
+
+<p class="note">So, you see, the code is not duplicated. If you want to create a repository for a new model, you can extend the GenericRepository class and implement the methods.</p>
+
+<br>
+
+### C. You can use the generic repository in the Service
+
+```typescript
+// ❌❌❌ this is BAD code
+@Injectable()
+export class UserService {
+  constructor(private readonly userRepository: UserRepository) {}
+
+  async find(filter: FilterQuery<User>): Promise<User[]> {
+    return this.userRepository.findAll(filter);
+  }
+
+  async findOne(filter: FilterQuery<User>): Promise<User> {
+    return this.userRepository.findOne(filter);
+  }
+}
+```
+
+```typescript
+// ✅✅✅ this is GOOD code
+@Injectable()
+export abstract class GenericService<T> {
+  constructor(private readonly repository: GenericRepository<T>) {}
+
+  async find(filter: FilterQuery<T>): Promise<T[]> {
+    return this.repository.findAll(filter);
+  }
+
+  async findOne(filter: FilterQuery<T>): Promise<T> {
+    return this.repository.findOne(filter);
+  }
+
+  /// update, delete, create, etc...
+}
+```
+
+```typescript
+@Injectable()
+export class UserService extends GenericService<User> {
+  constructor(private readonly userRepository: UserRepository) {
+    super(userRepository);
+  }
+}
+```
+
+```typescript
+@Injectable()
+export class OrderService extends GenericService<Order> {
+  constructor(private readonly orderRepository: OrderRepository) {
+    super(orderRepository);
+  }
+}
+```
+
+### Finally
+
+Generic Repository Pattern is a design pattern that provides a generic interface for interacting with a data layer. It make the code more reusable and easier to maintain.
+
+
